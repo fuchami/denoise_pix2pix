@@ -188,6 +188,72 @@ def DCGAN(generator, discriimnator, img_shape, patch_size):
 
     return DCGAN
 
+def load_generator(img_shape, disc_img_shape):
+    model = generator_unet_upsampling(img_shape, disc_img_shape)
+    return model
 
-    
+def load_DCGAN_discriminator(img_shape, disc_img_shape, patch_num):
+    model = DCGAN_discriminator(img_shape, disc_img_shape, patch_num)
+    return model
+
+def load_DCGAN(generator, discriminator, img_shape, patch_size):
+    model = DCGAN(generator, discriminator, img_shape, patch_size)
+    return model
+
+# L1正則化
+def l1_loss(y_true, y_pred):
+    return K.sum(K.abs(y_pred, - y_true), axis=-1)
+
+# 正規化(-1~1 → 0~1)
+def inverse_normalization(X):
+    return (X + 1.) / 2.
+
+def to3d(X):
+    if X.shap[-1] == 3: return X
+    b = X.transpose(3,1,2,0)
+    c = np.array(b[0], b[0], b[0])
+    return c.transpose(3,1,2,0)
+
+def plot_generated_batch(X_proc, X_raw, generator_model, batch_size, suffix):
+    X_gen  = generator_model.predict(X_raw)
+    X_raw  = inverse_normalization(X_raw)
+    X_peoc = inverse_normalization(X_proc)
+    X_gen  = inverse_normalization(X_gen)
+
+    Xs = to3d(X_raw[:5])
+    Xg = to3d(X_gen[:5])
+    Xr = to3d(X_proc[:5])
+    Xs = np.concatenate(Xs, axis=1)
+    Xg = np.concatenate(Xg, axis=1)
+    Xr = np.concatenate(Xr, axis=1)
+    XX = np.concatenate((Xs, Xg, Xr), axis=0)
+
+    plt.imshow(XX)
+    plt.axis('off')
+    plt.savefig("current_batch_"+suffix+".png")
+    plt.clf()
+    plt.close()
+
+def extract_patched(X, patch_size):
+    list_X = []
+    list_row_idx = [(i*patch_size, (i+1)*patch_size) for i in range(X.shape[1]// patch_size)]
+    list_col_idx = [(i*patch_size, (i+1)*patch_size) for i in range(X.shape[2]// patch_size)]
+    for col_idx in list_col_idx:
+        list_X.append(X[:, row_idx[0]:row_idx[1], col_idx[0]:col_idx[1], :])
+    return list_X
+
+def get_disc_batch(procImage, rawImage, generator_model, batch_counter, patch_size):
+    if batch_counter % 2 == 0:
+        # produce an output
+        X_disc = generator_model.predict(rawImage)
+        y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.unit8)
+        y_disc[:, 0] = 1
+
+    else:
+        X_disc = proImage
+        y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.unit8)
+
+    X_disc = extract_patched(X_disc, patch_size)
+    return X_disc, y_disc
+        
 
