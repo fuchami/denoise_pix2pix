@@ -256,4 +256,85 @@ def get_disc_batch(procImage, rawImage, generator_model, batch_counter, patch_si
     X_disc = extract_patched(X_disc, patch_size)
     return X_disc, y_disc
         
+def train():
+    # load data
+    rawImage, procImage, rawImage_val, procImage_val = load_data(datasetpath)
+
+    img_shape = rawImage.shape[-3:]
+    patch_num = (img_shape[0]// patch_size) * (img_shape[1] // patch_size)
+    disc_img_shape = (patch_size, patch_size, procImage.shape[-1])
+
+    # train
+    opt_dcgan = Adam(lr=1E-3, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+    opt_discriminator = Adam(lr=1E3, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+
+    # load generator model
+    generator_mdoel = load_generator(img_shape, disc_img_shape)
+    # load discriminator model
+    discriminator_model = load_DCGAN_discriminator(img_shape, disc_img_shape, patch_num)
+
+    genetator_model.compile(loss='mae', optimizer=opt_discriminator)
+    discriminator_model.trainable = False
+
+    DCGAN_model = load_DCGAN(generator_model, discriminator_model, img_shape, patch_size)
+
+    loss = [l1_loss,'binary_crossentropy']
+    loss_weights = [1E1, 1]
+    DCGAN_model.compile(loss=loss, loss_weights=loss_weights, optimizer=opt_dcgan)
+
+    discriminator_model.trainable = True
+    discriminator_model.compile(loss='binary_crossentropy', optimizer=opt_discriminator)
+
+    # start training
+    print('start traing')
+    for e in range(epoch):
+
+        perm = np.random.permutation(raeImage.shape[0])
+        X_procImage = procImage[perm]
+        X_rawImage  = rawImage[perm]
+        X_procImageIter = [X_procImage[i:i+batch_size] for i in range(0, rawImage.shape[0], batch_size)]
+        X_rawImageIter  = [X_rawImage[i:i+batch_size] for i in range(0, rawImage.shape[0], batch_size)]
+        b_it = 0
+        progbar = generic_utils.Progbar(len(X_procImageIter)*batch_size)
+        
+        for (X_proc_batch, X_raw_batch in zip(X_procImageIter, X_rawImageIter)):
+            b_it += 1
+            X_disc, y_disc = get_disc_batch(X_proc_batch, X_raw_batch, generator_model, b_it, patch_size)
+            raw_disc, _ = get_disc_batch(X_raw_batch, X_raw_batch, generator_mdoel, 1, patch_size)
+            x_disc = X_disc + raw_disc
+            # update the discriminator
+            disc_loss = discriminator_model.train_on_batch(x_disc, y_disc)
+
+            # create a batch to feed the generator model
+            idx = np.random.choice(procImage.shape[0], batch_size)
+            X_gen_target, X_gen = procImage[idx], rawImage[idx]
+            y_gen = np.zeros((X_gen.shape[0],2), dtype=np.unit8)
+            y_gen[:, 1] = 1
+
+            # Freeze the discriminator
+            discriminator_model.trainable = False
+            gen_loss = DCGAN_model.train_on_batch(X_gen, [X_gen_target, y_gen])
+            # Unfreeze the discriminator
+            discriminato_model.trainable = True
+
+            progbar.add(batch_size, values=[
+                ("D logloss", disc_loss),
+                ("G tot", gen_loss[0]),
+                ("G L1", gen_loss[1]),
+                ("G logloss", gen_loss[2])
+            ])
+
+            # save images for Visualization
+            if b_it % (procImage.shape[0]//batch_size//2) == 0:
+                plot_generated_batch(X_proc_batch, X_raw_batch, generator_model, batch_size, "training")
+                idx = np.random.choice(procImage_val.shape[0], batchsize)
+                X_gen_target, X_gen = procImage_val[idx], rawImage_val[idx]
+                plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
+
+        print("")
+        print('Epoch %s %s, Time: %s' % (e + 1, epoch))
+        
+
+
+            
 
