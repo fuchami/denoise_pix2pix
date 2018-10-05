@@ -14,7 +14,7 @@ import glob
 def main():
 
     # original path
-    origin_path = '/media/futami/HDD1/DATASET_KINGDOM/ORGINAL_DATA/cifar/test'
+    origin_path = '/media/futami/HDD1/DATASET_KINGDOM/ORGINAL_DATA/cifar/train/'
     save2_path = '/media/futami/HDD1/DATASET_KINGDOM/denoise_cifar/'
     img_path_list = glob.glob(origin_path+'/*.png')
     #print(img_path_list)
@@ -23,10 +23,11 @@ def main():
 
     for img_path in img_path_list:
         print(img_path)
+        print(str(cnt))
 
         img = cv2.imread(img_path)
         # そのまま保存
-        cv2.imwrite(save2_path+'train_val/'+str(cnt)+'.png', img)
+        cv2.imwrite(save2_path+'truth_train/'+str(cnt)+'.png', img)
 
         row,col,ch = img.shape
         # ごましお比率
@@ -42,7 +43,7 @@ def main():
         coords = [np.random.randint(0, i-1, int(num_papper)) for i in img.shape]
         sp_img[coords[:-1]] = (0,0,0)
 
-        cv2.imwrite(save2_path+'train_val/'+str(cnt)+'.png', sp_img)
+        cv2.imwrite(save2_path+'noise_train/'+str(cnt)+'.png', sp_img)
 
         cnt += 1
 

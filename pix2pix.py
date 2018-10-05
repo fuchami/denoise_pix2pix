@@ -36,7 +36,7 @@ def to3d(X):
 def plot_generated_batch(X_proc, X_raw, generator_model, batch_size, suffix):
     X_gen  = generator_model.predict(X_raw)
     X_raw  = inverse_normalization(X_raw)
-    X_peoc = inverse_normalization(X_proc)
+    X_proc = inverse_normalization(X_proc)
     X_gen  = inverse_normalization(X_gen)
 
     Xs = to3d(X_raw[:5])
@@ -79,12 +79,19 @@ def get_disc_batch(noise_train, truth_train, generator_model, batch_counter, pat
 def train():
     # load data
     load_img = Load_Image('/media/futami/HDD1/DATASET_KINGDOM/denoise_cifar/')
-    truth_train, noise_train, truth_val, noise_val = load_img.load()
-    print(truth_train.shape)
+    #　訓練入力　訓練出力　テスト入力　テスト出力
+    noise_train, truth_train, noise_val, truth_val = load_img.load()
+    print('noise train: ' , noise_train.shape)
+    print('truth train: ' , truth_train.shape)
+    print('nosie validation: ' , noise_val.shape)
+    print('truth validation:' , truth_val.shape)
 
     img_shape = truth_train.shape[-3:]
+    print('image_shape: ', img_shape)
     patch_num = (img_shape[0]// patch_size) * (img_shape[1] // patch_size)
     disc_img_shape = (patch_size, patch_size, noise_train.shape[-1])
+
+    print('disc_img_shape:' , disc_img_shape)
 
     # train
     opt_dcgan = Adam(lr=1E-3, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
@@ -153,12 +160,12 @@ def train():
             # save images for Visualization
             if b_it % (noise_train.shape[0]//batch_size//2) == 0:
                 plot_generated_batch(X_proc_batch, X_raw_batch, generator_model, batch_size, "training")
-                idx = np.random.choice(noise_train_val.shape[0], batchsize)
-                X_gen_target, X_gen = noise_train_val[idx], truth_train_val[idx]
+                idx = np.random.choice(noise_val.shape[0], batch_size)
+                X_gen_target, X_gen = noise_val[idx], truth_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
 
         print("")
-        print('Epoch %s %s, Time: %s' % (e + 1, epoch))
+        print('Epoch %s %s' % (e + 1, epoch))
         
 def main():
 
