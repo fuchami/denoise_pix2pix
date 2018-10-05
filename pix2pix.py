@@ -14,11 +14,9 @@ import model
 from load import Load_Image
 
 # このあたりは引数に設定する
-dataset_path = "./data/*.hdf5"
 patch_size = 32
 batch_size = 12
 epoch      = 1000
-
 
 
 # L1正則化
@@ -30,7 +28,7 @@ def inverse_normalization(X):
     return (X + 1.) / 2.
 
 def to3d(X):
-    if X.shap[-1] == 3: return X
+    if X.shape[-1] == 3: return X
     b = X.transpose(3,1,2,0)
     c = np.array(b[0], b[0], b[0])
     return c.transpose(3,1,2,0)
@@ -80,7 +78,7 @@ def get_disc_batch(noise_train, truth_train, generator_model, batch_counter, pat
         
 def train():
     # load data
-    load_img = Load_Image('/Users/yuuki/Desktop/python_code/datasets/')
+    load_img = Load_Image('/media/futami/HDD1/DATASET_KINGDOM/denoise_cifar/')
     truth_train, noise_train, truth_val, noise_val = load_img.load()
     print(truth_train.shape)
 
