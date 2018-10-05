@@ -29,14 +29,14 @@ def up_conv_block_unet(x, x2, f, name, bn_axis, bn=True, dropout=False):
 # Generator
 def generator_unet_upsampling(img_shape, disc_img_shape, model_name="generator_unet_upsampling"):
 
-    filters_num = 64
+    filters_num = 32
     axis_num = -1
     channels_num = img_shape[-1]
     min_s = min(img_shape[:-1])
 
     unet_input = Input(shape=img_shape, name="unet_input")
 
-    conv_num = int(np.floor(np.log(min_s)/np.log(2)))
+    conv_num = int(np.floor(np.log(min_s)/np.log(2))) - 1
     list_filters_num = [filters_num*min(8, (2**i)) for i in range(conv_num)]
 
     # Encoder 入力をちっちゃく
@@ -53,7 +53,7 @@ def generator_unet_upsampling(img_shape, disc_img_shape, model_name="generator_u
         list_filters_num.append(filters_num)
     
     # Decoder
-    fist_up_conv = up_conv_block_unet(list_encoder[-1], list_encoder[-2],
+    first_up_conv = up_conv_block_unet(list_encoder[-1], list_encoder[-2],
                         list_filters_num[0], "unet_upconv2D_1", axis_num, dropout=True)
     list_decoder = [first_up_conv]
     for i, f in enumerate(list_filters_num[1:]):
@@ -63,7 +63,8 @@ def generator_unet_upsampling(img_shape, disc_img_shape, model_name="generator_u
         else:
             d = False
         up_conv = up_conv_block_unet(list_decoder[-1], list_encoder[-(i+3)], f,
-                        name, axis_num, dropout=d, list_decoder.append(up_conv))
+                        name, axis_num, dropout=d)
+        list_decoder.append(up_conv)
     
     x = Activation('relu')(list_decoder[-1])
     x = UpSampling2D(size=(2,2))(x)
@@ -74,19 +75,19 @@ def generator_unet_upsampling(img_shape, disc_img_shape, model_name="generator_u
     return generator_unet
 
 # Discriminator
-def DCGAN_discriminator(img_shape, disc_img_shape, patch_num, model_name='discriminator'):
-    disc_raw_img_shape = (disc_img_shape[0], disc_img_shape=[1], img_shape=[-1])
+def DCGAN_discriminator(img_shape, disc_img_shape, patch_num, model_name='DCGAN_discriminator'):
+    disc_raw_img_shape = (disc_img_shape[0], disc_img_shape[1], img_shape[-1])
     list_input = [Input(shape=disc_img_shape, name='dist_input'+str(i)) for i in range(patch_num)]
-    list_raw_input = [Input(shape=disc_raw_img_shape, name='disc_raw_input'+str(i))]
+    list_raw_input = [Input(shape=disc_raw_img_shape, name='disc_raw_input'+str(i)) for i in range(patch_num)]
 
     axis_num = -1
-    filters_num = 64
+    filters_num = 32
     conv_num = int(np.floor(np.log(disc_img_shape[1]/np.log(2))))
     list_filters = [filters_num*min(8, (2**i)) for i in range(conv_num)]
 
     # Fist Conv
     generated_patch_input = Input(shape=disc_img_shape, name='discriminator_inpit')
-    xg = Conv2D(list_filters[0], (3,3), strides=(2,2), name='raw_disc_conv2d_1', padding='same')(raw_patch_input)
+    xg = Conv2D(list_filters[0], (3,3), strides=(2,2), name='disc_conv2d_1', padding='same')(generated_patch_input)
     xg = BatchNormalization(axis=axis_num)(xg)
     xg = LeakyReLU(0.2)(xg)
 
@@ -120,6 +121,8 @@ def DCGAN_discriminator(img_shape, disc_img_shape, patch_num, model_name='discri
 
     discriminator_model = Model(inputs=(list_input+list_raw_input), outputs=[x_out], name=model_name)
 
+    return discriminator_model
+
 def DCGAN(generator, discriimnator, img_shape, patch_size):
     raw_input = Input(shape=img_shape, name='DCGAN_input')
     generated_image = generator(raw_input)
@@ -149,10 +152,12 @@ def DCGAN(generator, discriimnator, img_shape, patch_size):
 
 def load_generator(img_shape, disc_img_shape):
     model = generator_unet_upsampling(img_shape, disc_img_shape)
+    model.summary()
     return model
 
 def load_DCGAN_discriminator(img_shape, disc_img_shape, patch_num):
     model = DCGAN_discriminator(img_shape, disc_img_shape, patch_num)
+    model.summary()
     return model
 
 def load_DCGAN(generator, discriminator, img_shape, patch_size):
