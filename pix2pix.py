@@ -33,15 +33,16 @@ def to3d(X):
     c = np.array(b[0], b[0], b[0])
     return c.transpose(3,1,2,0)
 
-def plot_generated_batch(X_proc, X_raw, generator_model, batch_size, suffix):
-    X_gen  = generator_model.predict(X_raw)
-    X_raw  = inverse_normalization(X_raw)
-    X_proc = inverse_normalization(X_proc)
+def plot_generated_batch(X_truth, X_noise, generator_model, batch_size, suffix):
+    X_gen  = generator_model.predict(X_noise)
+    X_raw  = inverse_normalization(X_noise)
+    X_proc = inverse_normalization(X_truth)
     X_gen  = inverse_normalization(X_gen)
 
-    Xs = to3d(X_raw[:5])
+    # 上からノイズ画像　生成画像、　正解画像（真値）
+    Xs = to3d(X_noise[:5])
     Xg = to3d(X_gen[:5])
-    Xr = to3d(X_proc[:5])
+    Xr = to3d(X_truth[:5])
     Xs = np.concatenate(Xs, axis=1)
     Xg = np.concatenate(Xg, axis=1)
     Xr = np.concatenate(Xr, axis=1)
@@ -62,15 +63,15 @@ def extract_patched(X, patch_size):
             list_X.append(X[:, row_idx[0]:row_idx[1], col_idx[0]:col_idx[1], :])
     return list_X
 
-def get_disc_batch(noise_train, truth_train, generator_model, batch_counter, patch_size):
+def get_disc_batch(truthImage, noiseImage, generator_model, batch_counter, patch_size):
     if batch_counter % 2 == 0:
         # produce an output
-        X_disc = generator_model.predict(truth_train)
+        X_disc = generator_model.predict(noiseImage)
         y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.uint8)
         y_disc[:, 0] = 1
 
     else:
-        X_disc = noise_train
+        X_disc = truthImage
         y_disc = np.zeros((X_disc.shape[0], 2), dtype=np.uint8)
 
     X_disc = extract_patched(X_disc, patch_size)
@@ -79,17 +80,18 @@ def get_disc_batch(noise_train, truth_train, generator_model, batch_counter, pat
 def train():
     # load data
     load_img = Load_Image('/media/futami/HDD1/DATASET_KINGDOM/denoise_cifar/')
-    #　訓練入力　訓練出力　テスト入力　テスト出力
-    noise_train, truth_train, noise_val, truth_val = load_img.load()
-    print('noise train: ' , noise_train.shape)
-    print('truth train: ' , truth_train.shape)
-    print('nosie validation: ' , noise_val.shape)
-    print('truth validation:' , truth_val.shape)
+    # 正解画像、入力画像
+    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load()
+    
+    print('truthImgae.shape', truthImage.shape)
+    print('noiseImage.shape', noiseImage.shape)
+    print('truthImage_val', truthImage_val.shape)
+    print('noiseImage_val', noiseImage_val.shape)
 
-    img_shape = truth_train.shape[-3:]
+    img_shape = noiseImage.shape[-3:]
     print('image_shape: ', img_shape)
     patch_num = (img_shape[0]// patch_size) * (img_shape[1] // patch_size)
-    disc_img_shape = (patch_size, patch_size, noise_train.shape[-1])
+    disc_img_shape = (patch_size, patch_size, truthImage.shape[-1])
 
     print('disc_img_shape:' , disc_img_shape)
 
@@ -122,25 +124,25 @@ def train():
     print('start traing')
     for e in range(epoch):
 
-        perm = np.random.permutation(truth_train.shape[0])
-        X_noise_train = noise_train[perm]
-        X_truth_train  = truth_train[perm]
-        X_noise_trainIter = [X_noise_train[i:i+batch_size] for i in range(0, truth_train.shape[0], batch_size)]
-        X_truth_trainIter  = [X_truth_train[i:i+batch_size] for i in range(0, truth_train.shape[0], batch_size)]
+        perm = np.random.permutation(noiseImage.shape[0])
+        X_truthImage = truthImage[perm]
+        X_noiseImage = noiseImage[perm]
+        X_truthImageIter = [X_truthImage[i:i+batch_size] for i in range(0, noiseImage.shape[0], batch_size)]
+        X_noiseImageIter  = [X_noiseImage[i:i+batch_size] for i in range(0, noiseImage.shape[0], batch_size)]
         b_it = 0
-        progbar = generic_utils.Progbar(len(X_noise_trainIter)*batch_size)
+        progbar = generic_utils.Progbar(len(X_truthImageIter)*batch_size)
         
-        for (X_proc_batch, X_raw_batch) in zip(X_noise_trainIter, X_truth_trainIter):
+        for (X_truth_batch, X_noise_batch) in zip(X_truthImageIter, X_noiseImageIter):
             b_it += 1
-            X_disc, y_disc = get_disc_batch(X_proc_batch, X_raw_batch, generator_model, b_it, patch_size)
-            raw_disc, _ = get_disc_batch(X_raw_batch, X_raw_batch, generator_model, 1, patch_size)
-            x_disc = X_disc + raw_disc
+            X_disc, y_disc = get_disc_batch(X_truth_batch, X_noise_batch, generator_model, b_it, patch_size)
+            noise_disc, _ = get_disc_batch(X_noise_batch, X_noise_batch, generator_model, 1, patch_size)
+            x_disc = X_disc + noise_disc
             # update the discriminator
             disc_loss = discriminator_model.train_on_batch(x_disc, y_disc)
 
             # create a batch to feed the generator model
-            idx = np.random.choice(noise_train.shape[0], batch_size)
-            X_gen_target, X_gen = noise_train[idx], truth_train[idx]
+            idx = np.random.choice(truthImage.shape[0], batch_size)
+            X_gen_target, X_gen = truthImage[idx], noiseImage[idx]
             y_gen = np.zeros((X_gen.shape[0],2), dtype=np.uint8)
             y_gen[:, 1] = 1
 
@@ -158,10 +160,10 @@ def train():
             ])
 
             # save images for Visualization
-            if b_it % (noise_train.shape[0]//batch_size//2) == 0:
-                plot_generated_batch(X_proc_batch, X_raw_batch, generator_model, batch_size, "training")
-                idx = np.random.choice(noise_val.shape[0], batch_size)
-                X_gen_target, X_gen = noise_val[idx], truth_val[idx]
+            if b_it % (truthImage.shape[0]//batch_size//2) == 0:
+                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training")
+                idx = np.random.choice(truthImage_val.shape[0], batch_size)
+                X_gen_target, X_gen = truthImage_val[idx], noiseImage_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
 
         print("")

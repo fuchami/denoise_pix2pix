@@ -71,4 +71,4 @@ class Load_Image():
         self.noise_val = np.array(self.noise_val).astype(np.float32)
         self.noise_val = self.normalization(self.noise_val)
 
-        return self.noise_train, self.truth_train, self.noise_val, self.truth_val
+        return self.truth_train, self.noise_train, self.truth_val, self.noise_val
