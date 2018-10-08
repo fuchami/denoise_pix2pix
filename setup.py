@@ -58,7 +58,7 @@ if __name__ == '__main__' :
     source_dir = '/media/futami/HDD1/DATASET_KINGDOM/ORIGINAL_DATA/'
     target_dir = '/media/futami/HDD1/DATASET_KINGDOM/denoise/'
 
-    noise_path = 'block_0915_before_64x64/'
-    truth_path = 'block_0915_after_64x64/'
+    noise_path = '0915before/'
+    truth_path = '0915after/'
 
     main(source_dir, target_dir, noise_path, truth_path)
