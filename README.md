@@ -9,7 +9,7 @@ pix2pixを使ってノイズ除去を試みる
 ![current_batch_training.png](./images/current_batch_training.png)
 
 ## current_batch_validation.png
-![current_batch_validation.png](./images/validation.png)
+![current_batch_validation.png](./images/current_batch_validation.png)
 
 # prepare the datasets
 
