@@ -12,7 +12,7 @@ pix2pixを使ってノイズ除去を試みる
 ![current_batch_validation.png](./images/current_batch_validation.png)
 
 # prepare the datasets
-
+```
 datasets/
 ├ noise_train (学習用:ノイズのある入力画像)
     ├ image1.png
@@ -27,6 +27,7 @@ datasets/
 ├ truth_val   (検証用:ノイズのない出力画像)
     ├ image1.png
     └ image2.png
+```
 
 あとはload.pyで自動的にすべての画像を読み込んでくれる
 
