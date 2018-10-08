@@ -14,19 +14,19 @@ pix2pixを使ってノイズ除去を試みる
 # prepare the datasets
 
 datasets/
-　├ noise_train (学習用:ノイズのある入力画像)
-　　├ image1.png
-　　├ image2.png
-　　└ image3.png
-　├ truth_train (学習用:ノイズのない出力画像)
-　　├ image1.png
-　　└ image2.png
-　├ noise_val   (検証用:ノイズのある入力画像)
-　　├ image1.png
-　　└ image2.png
-　├ truth_val   (検証用:ノイズのない出力画像)
-　　├ image1.png
-　　└ image2.png
+├ noise_train (学習用:ノイズのある入力画像)
+    ├ image1.png
+    ├ image2.png
+    └ image3.png
+├ truth_train (学習用:ノイズのない出力画像)
+    ├ image1.png
+    └ image2.png
+├ noise_val   (検証用:ノイズのある入力画像)
+    ├ image1.png
+    └ image2.png
+├ truth_val   (検証用:ノイズのない出力画像)
+    ├ image1.png
+    └ image2.png
 
 あとはload.pyで自動的にすべての画像を読み込んでくれる
 
