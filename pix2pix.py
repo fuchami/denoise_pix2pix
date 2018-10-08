@@ -27,6 +27,9 @@ def l1_loss(y_true, y_pred):
 def inverse_normalization(X):
     return (X + 1.) / 2.
 
+def inverse_normalization255(X):
+    return ((X + 1.)/ 2.)*255
+
 def to3d(X):
     if X.shape[-1] == 3: return X
     b = X.transpose(3,1,2,0)
@@ -35,8 +38,8 @@ def to3d(X):
 
 def plot_generated_batch(X_truth, X_noise, generator_model, batch_size, suffix):
     X_gen  = generator_model.predict(X_noise)
-    X_raw  = inverse_normalization(X_noise)
-    X_proc = inverse_normalization(X_truth)
+    X_noise  = inverse_normalization(X_noise)
+    X_truth = inverse_normalization(X_truth)
     X_gen  = inverse_normalization(X_gen)
 
     # 上からノイズ画像　生成画像、　正解画像（真値）
@@ -46,6 +49,7 @@ def plot_generated_batch(X_truth, X_noise, generator_model, batch_size, suffix):
     Xs = np.concatenate(Xs, axis=1)
     Xg = np.concatenate(Xg, axis=1)
     Xr = np.concatenate(Xr, axis=1)
+
     XX = np.concatenate((Xs, Xg, Xr), axis=0)
 
     plt.imshow(XX)
