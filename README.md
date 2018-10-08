@@ -15,9 +15,9 @@ pix2pixを使ってノイズ除去を試みる
 
 datasets/
 ├ noise_train (学習用:ノイズのある入力画像)
-    ├ image1.png
-    ├ image2.png
-    └ image3.png
+  ├ image1.png
+  ├ image2.png
+  └ image3.png
 ├ truth_train (学習用:ノイズのない出力画像)
     ├ image1.png
     └ image2.png
