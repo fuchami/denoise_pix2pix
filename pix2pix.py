@@ -54,7 +54,7 @@ def plot_generated_batch(X_truth, X_noise, generator_model, batch_size, suffix):
 
     plt.imshow(XX)
     plt.axis('off')
-    plt.savefig("current_batch_"+suffix+".png")
+    plt.savefig("./images/current_batch_"+suffix+".png")
     plt.clf()
     plt.close()
 
@@ -105,16 +105,16 @@ def train():
 
     # load generator model
     generator_model = model.load_generator(img_shape, disc_img_shape)
-    plot_model(generator_model, to_file='generator.png', show_shapes=True)
+    plot_model(generator_model, to_file='./images/model/generator.png', show_shapes=True)
     # load discriminator model
     discriminator_model = model.load_DCGAN_discriminator(img_shape, disc_img_shape, patch_num)
-    plot_model(discriminator_model, to_file='discriminator.png', show_shapes=True)
+    plot_model(discriminator_model, to_file='./images/model/discriminator.png', show_shapes=True)
 
     generator_model.compile(loss='mae', optimizer=opt_discriminator)
     discriminator_model.trainable = False
 
     DCGAN_model = model.load_DCGAN(generator_model, discriminator_model, img_shape, patch_size)
-    plot_model(DCGAN_model, to_file='DCGAN_model.png', show_shapes=True)
+    plot_model(DCGAN_model, to_file='./images/model/DCGAN_model.png', show_shapes=True)
 
     loss = [l1_loss,'binary_crossentropy']
     loss_weights = [1E1, 1]
