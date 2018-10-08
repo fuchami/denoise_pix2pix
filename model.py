@@ -1,4 +1,8 @@
 # coding:utf-8
+"""
+pix2pixのモデル構築スクリプト
+
+"""
 
 from keras.models import Model
 from keras.layers.core import Flatten, Dense, Dropout, Activation, Lambda, Reshape
