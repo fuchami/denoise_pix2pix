@@ -25,36 +25,24 @@ def main(src_dir, tar_dir, noise_path, truth_path):
     img_list = os.listdir(src_dir + noise_path)
     # 取得した画像をランダムにシャッフル
     random.shuffle(img_list)
-    # 入力画像
+
+    # 移動
     for i in range(len(img_list)):
         shutil.copyfile("%s%s%s" % (src_dir, noise_path, img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'noise_train', i))
-
-    img_list = os.listdir(tar_dir + 'noise_train')
-    random.shuffle(img_list)
-    TEST_SIZE = int(len(img_list)/10)
-    # 検証データに分割
-    for i in range (TEST_SIZE):
-        os.rename("%s%s/%s" % (tar_dir, 'noise_train', img_list[i]),
-                            "%s%s/img%04d.png" % (tar_dir, 'noise_val', i))
-    
-    # こここから出力
-
-    img_list = os.listdir(src_dir+truth_path)
-    random.shuffle(img_list)
-
-    for i in range(len(img_list)):
         shutil.copyfile("%s%s%s" % (src_dir, truth_path, img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'truth_train', i))
 
-    img_list = os.listdir(tar_dir + 'truth_train' )
+    img_list = os.listdir(tar_dir + 'noise_train')
     random.shuffle(img_list)
+
     TEST_SIZE = int(len(img_list)/10)
-    # 検証データに分割
     for i in range (TEST_SIZE):
+        os.rename("%s%s/%s" % (tar_dir, 'noise_train', img_list[i]),
+                            "%s%s/img%04d.png" % (tar_dir, 'noise_val', i))
         os.rename("%s%s/%s" % (tar_dir, 'truth_train', img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'truth_val', i))
-
+    
 
 if __name__ == '__main__' :
     source_dir = '/media/futami/HDD1/DATASET_KINGDOM/ORGINAL_DATA/'
