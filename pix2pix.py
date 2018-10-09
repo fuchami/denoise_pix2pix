@@ -83,7 +83,7 @@ def get_disc_batch(truthImage, noiseImage, generator_model, batch_counter, patch
         
 def train():
     # load data
-    load_img = Load_Image('/media/futami/HDD1/DATASET_KINGDOM/denoise_cifar/')
+    load_img = Load_Image('/media/futami/HDD1/DATASET_KINGDOM/denoise/')
     # 正解画像、入力画像
     truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load()
     
