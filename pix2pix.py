@@ -1,6 +1,8 @@
 # coding:utf-8
 
 import numpy as np
+import argparse
+import subprocess as sp
 
 import h5py
 import matplotlib.pyplot as plt
@@ -13,12 +15,11 @@ import keras.backend as K
 import model
 from load import Load_Image
 
-# このあたりは引数に設定する
-patch_size = 32
-batch_size = 12
-epoch      = 1000
-
-
+# Line API
+def send_image(path_to_img, line_notify_token, message="notification"):
+    line_notify_api = 'https://notify-api.line.me/api/notify'
+    sp.getoutput(
+        "curl -X POST {} -H 'Authorization: Bearer {}' -F 'message={}' -F 'imageFile=@{}'".format(line_notify_api, line_notify_token, m, path_to_img))
 # L1正則化
 def l1_loss(y_true, y_pred):
     return K.sum(K.abs(y_pred - y_true), axis=-1)
@@ -58,6 +59,7 @@ def plot_generated_batch(X_truth, X_noise, generator_model, batch_size, suffix):
     plt.clf()
     plt.close()
 
+
 def extract_patched(X, patch_size):
     list_X = []
     list_row_idx = [(i*patch_size, (i+1)*patch_size) for i in range(X.shape[1]// patch_size)]
@@ -81,11 +83,16 @@ def get_disc_batch(truthImage, noiseImage, generator_model, batch_counter, patch
     X_disc = extract_patched(X_disc, patch_size)
     return X_disc, y_disc
         
-def train():
+def train(args):
+
+    # 各種パラメータ
+    batch_size = args.batchsize
+    patch_size = args.patchsize
+
     # load data
-    load_img = Load_Image('/media/futami/HDD1/DATASET_KINGDOM/denoise/')
+    load_img = Load_Image()
     # 正解画像、入力画像
-    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load()
+    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load(args.datasetpath, args.imgsize)
     
     print('truthImgae.shape', truthImage.shape)
     print('noiseImage.shape', noiseImage.shape)
@@ -165,17 +172,29 @@ def train():
 
             # save images for Visualization
             if b_it % (truthImage.shape[0]//batch_size//2) == 0:
-                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training")
+                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training", b_it)
                 idx = np.random.choice(truthImage_val.shape[0], batch_size)
                 X_gen_target, X_gen = truthImage_val[idx], noiseImage_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
+            
+            send_image("./images/current_batch_validation.png", args.line_token)
+
 
         print("")
         print('Epoch %s %s' % (e + 1, epoch))
         
 def main():
+    parser = argparse.ArgumentParser(description='Train Denoise GAN')
+    parser.add_argument('--datasetpath', '-d', type=str, required=True, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
+    parser.add_argument('--line_token', type=str, required=False)
+    parser.add_argument('--imgsize', default=64)
+    parser.add_argument('--epoch', default=2000)
+    parser.add_argument('--patchsize', default=32)
+    parser.add_argument('--batchsize', default=12)
 
-    train()
+    args = parser.parse_args()
+
+    train(args)
 
 if __name__ == '__main__' :
     main()
