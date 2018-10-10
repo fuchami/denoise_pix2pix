@@ -90,9 +90,9 @@ def train(args):
     patch_size = args.patchsize
 
     # load data
-    load_img = Load_Image()
+    load_img = Load_Image(args.datasetpath, args.imgsize)
     # 正解画像、入力画像
-    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load(args.datasetpath, args.imgsize)
+    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load()
     
     print('truthImgae.shape', truthImage.shape)
     print('noiseImage.shape', noiseImage.shape)
@@ -133,7 +133,7 @@ def train(args):
 
     # start training
     print('start traing')
-    for e in range(epoch):
+    for e in range(args.epoch):
 
         perm = np.random.permutation(noiseImage.shape[0])
         X_truthImage = truthImage[perm]
@@ -172,10 +172,11 @@ def train(args):
 
             # save images for Visualization
             if b_it % (truthImage.shape[0]//batch_size//2) == 0:
-                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training", b_it)
+                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training")
                 idx = np.random.choice(truthImage_val.shape[0], batch_size)
                 X_gen_target, X_gen = truthImage_val[idx], noiseImage_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
+<<<<<<< HEAD
 
             print(b_it) 
             if b_it % (truthImage.shape[0]//batch_size//10) == 0:
@@ -197,10 +198,19 @@ def train(args):
     json_string = discriminator_model.to_json()
     open('./discriminator_model', 'w').write(json_string)
     discriminator_model.save_weights('./discriminator_weights.h5')
+=======
+            
+                if b_it % (truthImage.shape[0]//batch_size//8) == 0:
+                    send_image("./images/current_batch_validation.png", args.line_token)
+
+
+        print("")
+        print('Epoch %s %s' % (e + 1, args.epoch))
+>>>>>>> d8746e148ae30c71d78b02d443d084c1ae86d73d
         
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
-    parser.add_argument('--datasetpath', '-d', type=str, required=True, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
+    parser.add_argument('--datasetpath', '-d', type=str, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
     parser.add_argument('--line_token', '-l', type=str, required=True)
     parser.add_argument('--imgsize', default=64)
     parser.add_argument('--epoch', default=2000)
