@@ -186,7 +186,7 @@ def train(args):
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
     parser.add_argument('--datasetpath', '-d', type=str, required=True, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
-    parser.add_argument('--line_token', type=str, required=False)
+    parser.add_argument('--line_token', '-l', type=str, required=True)
     parser.add_argument('--imgsize', default=64)
     parser.add_argument('--epoch', default=2000)
     parser.add_argument('--patchsize', default=32)
