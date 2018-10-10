@@ -16,7 +16,7 @@ import model
 from load import Load_Image
 
 # Line API
-def send_image(path_to_img, line_notify_token, message="notification"):
+def send_image(path_to_img, line_notify_token, m="notification"):
     line_notify_api = 'https://notify-api.line.me/api/notify'
     sp.getoutput(
         "curl -X POST {} -H 'Authorization: Bearer {}' -F 'message={}' -F 'imageFile=@{}'".format(line_notify_api, line_notify_token, m, path_to_img))
@@ -176,12 +176,27 @@ def train(args):
                 idx = np.random.choice(truthImage_val.shape[0], batch_size)
                 X_gen_target, X_gen = truthImage_val[idx], noiseImage_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
-            
+
+            print(b_it) 
+            if b_it % (truthImage.shape[0]//batch_size//10) == 0:
             send_image("./images/current_batch_validation.png", args.line_token)
 
 
         print("")
         print('Epoch %s %s' % (e + 1, epoch))
+
+    """ model save """
+    json_string = DCGAN_model.to_json()
+    open('./DCGAN_model.json', 'w').write(json_string)
+    DCGAN_model.save_weights('./DCGAN_weights.h5')
+
+    json_string = generator_model.to_json()
+    open('./generator_model.json', 'w').write(json_string)
+    generator_model.save_weights('./generator_weights.h5')
+
+    json_string = discriminator_model.to_json()
+    open('./discriminator_model', 'w').write(json_string)
+    discriminator_model.save_weights('./discriminator_weights.h5')
         
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
