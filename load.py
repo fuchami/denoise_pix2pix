@@ -13,7 +13,7 @@ from keras.preprocessing.image import load_img, img_to_array
 
 class Load_Image():
 
-    def __init__(self, dataset_path, img_size=32):
+    def __init__(self, dataset_path, img_size=64):
 
         self.dataset_path = dataset_path 
         self.truth_train  = []

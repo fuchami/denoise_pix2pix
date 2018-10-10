@@ -33,14 +33,15 @@ def up_conv_block_unet(x, x2, f, name, bn_axis, bn=True, dropout=False):
 # Generator
 def generator_unet_upsampling(img_shape, disc_img_shape, model_name="generator_unet_upsampling"):
 
-    filters_num = 32
+    filters_num = 64
     axis_num = -1
     channels_num = img_shape[-1]
     min_s = min(img_shape[:-1])
 
     unet_input = Input(shape=img_shape, name="unet_input")
 
-    conv_num = int(np.floor(np.log(min_s)/np.log(2))) - 1
+    # 畳込みの回数は画像サイズに合わせて各自調整が必要
+    conv_num = int(np.floor(np.log(min_s)/np.log(2))) -2 
     list_filters_num = [filters_num*min(8, (2**i)) for i in range(conv_num)]
 
     # Encoder 入力をちっちゃく
@@ -53,7 +54,7 @@ def generator_unet_upsampling(img_shape, disc_img_shape, model_name="generator_u
 
     # prepare decode filters
     list_filters_num = list_filters_num[:2][::-1]
-    if len(list_filters_num) < conv_num-1: 
+    if len(list_filters_num) < conv_num : 
         list_filters_num.append(filters_num)
     
     # Decoder
@@ -85,7 +86,7 @@ def DCGAN_discriminator(img_shape, disc_img_shape, patch_num, model_name='DCGAN_
     list_raw_input = [Input(shape=disc_raw_img_shape, name='disc_raw_input'+str(i)) for i in range(patch_num)]
 
     axis_num = -1
-    filters_num = 32
+    filters_num = 64 
     conv_num = int(np.floor(np.log(disc_img_shape[1]/np.log(2))))
     list_filters = [filters_num*min(8, (2**i)) for i in range(conv_num)]
 
@@ -113,6 +114,8 @@ def DCGAN_discriminator(img_shape, disc_img_shape, patch_num, model_name='DCGAN_
     x = Dense(2, activation='softmax', name='disc_dense')(x_flat)
 
     Patch_GUN = Model(inputs=[generated_patch_input, raw_patch_input], outputs=[x], name='PatchGAN')
+    #print('patchGAN summary')
+    #Patch_GUN.summary()
 
     x = [Patch_GUN([list_input[i], list_raw_input[i]]) for i in range(patch_num)]
 

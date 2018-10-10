@@ -30,6 +30,8 @@ def main(src_dir, tar_dir, noise_path, truth_path):
     for i in range(len(img_list)):
         shutil.copyfile("%s%s%s" % (src_dir, noise_path, img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'noise_train', i))
+        
+        img_list[i] = img_list[i].replace('before', 'after')
         shutil.copyfile("%s%s%s" % (src_dir, truth_path, img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'truth_train', i))
 
@@ -40,6 +42,8 @@ def main(src_dir, tar_dir, noise_path, truth_path):
     for i in range (TEST_SIZE):
         os.rename("%s%s/%s" % (tar_dir, 'noise_train', img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'noise_val', i))
+
+        img_list[i] = img_list[i].replace('before', 'after')
         os.rename("%s%s/%s" % (tar_dir, 'truth_train', img_list[i]),
                             "%s%s/img%04d.png" % (tar_dir, 'truth_val', i))
     
