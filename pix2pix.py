@@ -16,7 +16,7 @@ import model
 from load import Load_Image
 
 # Line API
-def send_image(path_to_img, line_notify_token, message="notification"):
+def send_image(path_to_img, line_notify_token, m="notification"):
     line_notify_api = 'https://notify-api.line.me/api/notify'
     sp.getoutput(
         "curl -X POST {} -H 'Authorization: Bearer {}' -F 'message={}' -F 'imageFile=@{}'".format(line_notify_api, line_notify_token, m, path_to_img))
@@ -90,9 +90,9 @@ def train(args):
     patch_size = args.patchsize
 
     # load data
-    load_img = Load_Image()
+    load_img = Load_Image(args.datasetpath, args.imgsize)
     # 正解画像、入力画像
-    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load(args.datasetpath, args.imgsize)
+    truthImage, noiseImage, truthImage_val, noiseImage_val = load_img.load()
     
     print('truthImgae.shape', truthImage.shape)
     print('noiseImage.shape', noiseImage.shape)
@@ -133,7 +133,7 @@ def train(args):
 
     # start training
     print('start traing')
-    for e in range(epoch):
+    for e in range(args.epoch):
 
         perm = np.random.permutation(noiseImage.shape[0])
         X_truthImage = truthImage[perm]
@@ -172,20 +172,21 @@ def train(args):
 
             # save images for Visualization
             if b_it % (truthImage.shape[0]//batch_size//2) == 0:
-                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training", b_it)
+                plot_generated_batch(X_truth_batch, X_noise_batch, generator_model, batch_size, "training")
                 idx = np.random.choice(truthImage_val.shape[0], batch_size)
                 X_gen_target, X_gen = truthImage_val[idx], noiseImage_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
             
-            send_image("./images/current_batch_validation.png", args.line_token)
+                if b_it % (truthImage.shape[0]//batch_size//8) == 0:
+                    send_image("./images/current_batch_validation.png", args.line_token)
 
 
         print("")
-        print('Epoch %s %s' % (e + 1, epoch))
+        print('Epoch %s %s' % (e + 1, args.epoch))
         
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
-    parser.add_argument('--datasetpath', '-d', type=str, required=True, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
+    parser.add_argument('--datasetpath', '-d', type=str, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
     parser.add_argument('--line_token', '-l', type=str, required=True)
     parser.add_argument('--imgsize', default=64)
     parser.add_argument('--epoch', default=2000)
