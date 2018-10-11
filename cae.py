@@ -119,7 +119,7 @@ def train(args):
         print("")
         print('Epoch %s %s' % (e + 1, args.epoch))
         print("send image to LINE massage !")
-        send_image("./images/current_batch_validation.png", args.line_token, 
+        send_image("./images/CAE_current_batch_validation.png", args.line_token, 
                     "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
 
     """ model save """
@@ -131,7 +131,7 @@ def train(args):
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise Convolutional Auto Encoder')
     parser.add_argument('--datasetpath', '-d', type=str, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
-    parser.add_argument('--line_token', '-l', type=str, required=False)
+    parser.add_argument('--line_token', '-l', type=str, required=True)
     parser.add_argument('--imgsize', '-s', default=64)
     parser.add_argument('--epoch', default=2000)
     parser.add_argument('--patchsize', default=32)
