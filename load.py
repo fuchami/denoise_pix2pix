@@ -20,7 +20,7 @@ class Load_Image():
         self.noise_train  = []
         self.truth_val    = []
         self.noise_val    = []
-        self.img_size     = img_size
+        self.img_size     = int(img_size)
 
     def normalization(self, X):
         return X / 127.5 - 1 

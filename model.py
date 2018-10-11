@@ -2,12 +2,14 @@
 """
 pix2pixのモデル構築スクリプト
 
+CAEを追加
+
 """
 
 from keras.models import Model
 from keras.layers.core import Flatten, Dense, Dropout, Activation, Lambda, Reshape
 from keras.layers.convolutional import Conv2D, Deconv2D, ZeroPadding2D, UpSampling2D
-from keras.layers import Input, Concatenate
+from keras.layers import Input, Concatenate, MaxPooling2D, Activation
 from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import MaxPooling2D
@@ -157,7 +159,35 @@ def DCGAN(generator, discriimnator, img_shape, patch_size):
 
     return DCGAN
 
-def load_generator(img_shape, disc_img_shape):
+# Convolutional Auto Encoder
+def CAE(img_shape, model_name='Conv_Auto_Encoder'):
+    input_img = Input(shape=img_shape)
+    x = Conv2D(32, (3, 3), padding='same')(input_img)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = MaxPooling2D((2, 2), padding='same')(x)
+    x = Conv2D(32, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    encoded = MaxPooling2D((2, 2), padding='same')(x)
+
+    x = Conv2D(32, (3, 3), padding='same')(encoded)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = UpSampling2D((2, 2))(x)
+    x = Conv2D(32, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = UpSampling2D((2, 2))(x)
+    x = Conv2D(3, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    decoded = Activation('sigmoid')(x)
+
+    model = Model(input_img, decoded)
+
+    return model
+
+def load_generato(img_shape, disc_img_shape):
     model = generator_unet_upsampling(img_shape, disc_img_shape)
     model.summary()
     return model
@@ -169,4 +199,9 @@ def load_DCGAN_discriminator(img_shape, disc_img_shape, patch_num):
 
 def load_DCGAN(generator, discriminator, img_shape, patch_size):
     model = DCGAN(generator, discriminator, img_shape, patch_size)
+    return model
+
+def load_CAE(img_shape):
+    model = CAE(img_shape)
+    model.summary()
     return model
