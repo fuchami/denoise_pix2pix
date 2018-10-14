@@ -181,9 +181,10 @@ def train(args):
 
         print("")
         print('Epoch %s %s' % (e + 1, args.epoch))
-        print("send image to LINE massage !")
-        send_image("./images/current_batch_validation.png", args.line_token, 
-                    "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
+        if e % 100 == 0:
+            print("send image to LINE massage !")
+            send_image("./images/current_batch_validation.png", args.line_token, 
+                        "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
 
     """ model save """
     json_string = DCGAN_model.to_json()
