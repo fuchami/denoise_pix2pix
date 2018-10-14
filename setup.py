@@ -2,6 +2,7 @@
 
 """
 データを揃える前処理スクリプト
+1:9で訓練データと検証データに分割する
 
 """
 
@@ -9,50 +10,53 @@ import os, sys
 import glob
 import random
 import shutil
+import argparse
 
-def main(src_dir, tar_dir, noise_path, truth_path):
+def main(args):
 
-    if not os.path.exists(tar_dir+'noise_train/'):
-        os.makedirs(tar_dir+'noise_train')
-    if not os.path.exists(tar_dir+'noise_val'):
-        os.makedirs(tar_dir+'noise_val')
-    if not os.path.exists(tar_dir+'truth_train'):
-        os.makedirs(tar_dir+'truth_train')
-    if not os.path.exists(tar_dir+'truth_val'):
-        os.makedirs(tar_dir+'truth_val')
+    if not os.path.exists(args.targetdir+'noise_train/'):
+        os.makedirs(args.targetdir+'noise_train')
+    if not os.path.exists(args.targetdir+'noise_val'):
+        os.makedirs(args.targetdir+'noise_val')
+    if not os.path.exists(args.targetdir+'truth_train'):
+        os.makedirs(args.targetdir+'truth_train')
+    if not os.path.exists(args.targetdir+'truth_val'):
+        os.makedirs(args.targetdir+'truth_val')
     
     # パス内の画像リストの取得
-    img_list = os.listdir(src_dir + noise_path)
+    img_list = os.listdir(args.sourcedir + args.noisepath)
     # 取得した画像をランダムにシャッフル
     random.shuffle(img_list)
 
     # 移動
     for i in range(len(img_list)):
-        shutil.copyfile("%s%s%s" % (src_dir, noise_path, img_list[i]),
-                            "%s%s/img%04d.png" % (tar_dir, 'noise_train', i))
+        shutil.copyfile("%s%s%s" % (args.sourcedir, args.noisepath, img_list[i]),
+                            "%s%s/img%04d.png" % (args.targetdir, 'noise_train', i))
         
         img_list[i] = img_list[i].replace('before', 'after')
-        shutil.copyfile("%s%s%s" % (src_dir, truth_path, img_list[i]),
-                            "%s%s/img%04d.png" % (tar_dir, 'truth_train', i))
+        shutil.copyfile("%s%s%s" % (args.sourcedir, args.truthpath, img_list[i]),
+                            "%s%s/img%04d.png" % (args.targetdir, 'truth_train', i))
 
-    img_list = os.listdir(tar_dir + 'noise_train')
+    img_list = os.listdir(args.targetdir + 'noise_train')
     random.shuffle(img_list)
 
     TEST_SIZE = int(len(img_list)/10)
     for i in range (TEST_SIZE):
-        os.rename("%s%s/%s" % (tar_dir, 'noise_train', img_list[i]),
-                            "%s%s/img%04d.png" % (tar_dir, 'noise_val', i))
+        os.rename("%s%s/%s" % (args.targetdir, 'noise_train', img_list[i]),
+                            "%s%s/img%04d.png" % (args.targetdir, 'noise_val', i))
 
         img_list[i] = img_list[i].replace('before', 'after')
-        os.rename("%s%s/%s" % (tar_dir, 'truth_train', img_list[i]),
-                            "%s%s/img%04d.png" % (tar_dir, 'truth_val', i))
+        os.rename("%s%s/%s" % (args.targetdir, 'truth_train', img_list[i]),
+                            "%s%s/img%04d.png" % (args.targetdir, 'truth_val', i))
     
 
 if __name__ == '__main__' :
-    source_dir = '/media/futami/HDD1/DATASET_KINGDOM/ORGINAL_DATA/'
-    target_dir = '/media/futami/HDD1/DATASET_KINGDOM/denoise/'
+    parser = argparse.ArgumentParser(description='setup image data')
+    parser.add_argument('--sourcedir', '-s', type=str, required=True)
+    parser.add_argument('--targetdir', '-t', type=str, required=True)
+    parser.add_argument('--noisepath', '-np', type=str, required=True)
+    parser.add_argument('--truthpath', '-tp', type=str, required=True)
 
-    noise_path = '0915before/'
-    truth_path = '0915after/'
+    args = parser.parse_args()
 
-    main(source_dir, target_dir, noise_path, truth_path)
+    main(args)

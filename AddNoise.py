@@ -10,12 +10,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 import glob
+import argparse
 
-def main():
+def main(args):
 
     # original path
-    origin_path = '/media/futami/HDD1/DATASET_KINGDOM/ORGINAL_DATA/cifar/train/'
-    save2_path = '/media/futami/HDD1/DATASET_KINGDOM/denoise_cifar/'
+    origin_path = args.originpath
+    save2_path =  args.save2path
     img_path_list = glob.glob(origin_path+'/*.png')
     #print(img_path_list)
 
@@ -48,5 +49,10 @@ def main():
         cnt += 1
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Add Noise script')
 
-    main()
+    parser.add_argument('--originpath', '-p', type=str, repuired=True)
+    parser.add_argument('--save2path', '-s', type=str, required=True)
+
+    args = parser.parse_args()
+    main(args)
