@@ -3,6 +3,7 @@
 import numpy as np
 import argparse
 import subprocess as sp
+import os,sys
 
 import h5py
 import matplotlib.pyplot as plt
@@ -181,23 +182,27 @@ def train(args):
 
         print("")
         print('Epoch %s %s' % (e + 1, args.epoch))
+        # 100epochごとにLINEに通知
         if e % 100 == 0:
             print("send image to LINE massage !")
             send_image("./images/current_batch_validation.png", args.line_token, 
                         "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
 
     """ model save """
+    if not os.path.exists('./saved_model/'):
+        os.makedirs('./saved_model/')
+
     json_string = DCGAN_model.to_json()
-    open('./DCGAN_model.json', 'w').write(json_string)
-    DCGAN_model.save_weights('./DCGAN_weights.h5')
+    open('./saved_model/DCGAN_model.json', 'w').write(json_string)
+    DCGAN_model.save_weights('./saved_model/DCGAN_weights.h5')
 
     json_string = generator_model.to_json()
-    open('./generator_model.json', 'w').write(json_string)
-    generator_model.save_weights('./generator_weights.h5')
+    open('./saved_model/generator_model.json', 'w').write(json_string)
+    generator_model.save_weights('./saved_mddel/generator_weights.h5')
 
     json_string = discriminator_model.to_json()
-    open('./discriminator_model', 'w').write(json_string)
-    discriminator_model.save_weights('./discriminator_weights.h5')
+    open('./saved_model/discriminator_model', 'w').write(json_string)
+    discriminator_model.save_weights('./saved_model/discriminator_weights.h5')
         
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
