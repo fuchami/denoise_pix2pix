@@ -60,16 +60,17 @@ def main(args):
 
         plt.imshow(X_gen)
         plt.savefig(args.savepath + os.path.basename(img))
+        print("predict: " + args.savepath + os.path.basename(img))
         plt.clf()
         plt.close()
 
 
 if __name__ == '__main__' :
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='denoise predict using pix2pix model')
     parser.add_argument('--modeljson', '-m', type=str, default='./generator_model.json')
     parser.add_argument('--modelweight', '-w', type=str, default='./generator_model.h5')
-    parser.add_argument('--imgpath', '-p', type=str, require=True)
-    parser.add_argument('--savepath', '-s', type=str, require=True)
+    parser.add_argument('--imgpath', '-p', type=str, required=True)
+    parser.add_argument('--savepath', '-s', type=str, required=True)
     parser.add_argument('--loadimgsize', '-l', type=int, default=64)
 
     args = parser.parse_args()
