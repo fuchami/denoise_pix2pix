@@ -128,7 +128,7 @@ datasets/
 ### Generator
 ![generator.png](./images/model/generator.png)
 
-# Prerequistic
+# Requirement
 
 - Software
     - python3.6.3
