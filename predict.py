@@ -13,6 +13,8 @@ import argparse
 import os,sys
 import glob
 import matplotlib.pyplot as plt
+from PIL import Image
+import cv2
 
 def normalization(X):
     return X/ 127.5 -1
@@ -63,13 +65,12 @@ def main(args):
         X_gen = to3d(X_gen)
         X_res = np.concatenate(X_gen, axis=1)
 
-        plt.imshow(X_res)
-        plt.axis('off')
         out_name = os.path.basename(img_path_list[c])
-        plt.savefig(args.savepath + '/' + out_name)
-        print( "predict: " + args.savepath + '/' + out_name )
-        plt.clf()
-        plt.close()
+
+        print("predict: " + args.savepath + out_name)
+        X_res = cv2.cvtColor(X_res*255, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(args.savepath + out_name, X_res)
+
         c+=1
 
 
