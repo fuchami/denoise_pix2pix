@@ -85,6 +85,7 @@ optional arguments:
 ```
 ## predict.py
 学習済みのモデルを用いて実際にノイズ除去を行うスクリプト
+
 ```
 usage: predict.py [-h] [--modeljson MODELJSON] [--modelweight MODELWEIGHT]
                   --imgpath IMGPATH --savepath SAVEPATH
