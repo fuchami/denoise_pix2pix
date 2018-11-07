@@ -55,7 +55,7 @@ def plot_generated_batch(X_truth, X_noise, generator_model, batch_size, suffix):
 
     plt.imshow(XX)
     plt.axis('off')
-    plt.savefig("./images/current_batch_"+suffix+".png")
+    plt.savefig("./images/current_batch_"+suffix+"_AUG.png")
     plt.clf()
     plt.close()
 
@@ -183,7 +183,7 @@ def train(args):
         print('Epoch %s %s' % (e + 1, args.epoch))
         if e % 100 == 0:
             print("send image to LINE massage !")
-            send_image("./images/current_batch_validation.png", args.line_token, 
+            send_image("./images/current_batch_validation_AUG.png", args.line_token, 
                         "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
 
     """ model save """
@@ -196,7 +196,7 @@ def train(args):
     generator_model.save_weights('./generator_weights.h5')
 
     json_string = discriminator_model.to_json()
-    open('./discriminator_model', 'w').write(json_string)
+    open('./discriminator_model.json', 'w').write(json_string)
     discriminator_model.save_weights('./discriminator_weights.h5')
         
 def main():
