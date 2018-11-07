@@ -3,6 +3,7 @@
 import numpy as np
 import argparse
 import subprocess as sp
+import os,sys
 
 import h5py
 import matplotlib.pyplot as plt
@@ -181,32 +182,36 @@ def train(args):
 
         print("")
         print('Epoch %s %s' % (e + 1, args.epoch))
+        # 100epochごとにLINEに通知
         if e % 100 == 0:
             print("send image to LINE massage !")
             send_image("./images/current_batch_validation_AUG.png", args.line_token, 
                         "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
 
     """ model save """
+    if not os.path.exists('./saved_model/'):
+        os.makedirs('./saved_model/')
+
     json_string = DCGAN_model.to_json()
-    open('./DCGAN_model.json', 'w').write(json_string)
-    DCGAN_model.save_weights('./DCGAN_weights.h5')
+    open('./saved_model/DCGAN_model.json', 'w').write(json_string)
+    DCGAN_model.save_weights('./saved_model/DCGAN_weights.h5')
 
     json_string = generator_model.to_json()
-    open('./generator_model.json', 'w').write(json_string)
-    generator_model.save_weights('./generator_weights.h5')
+    open('./saved_model/generator_model.json', 'w').write(json_string)
+    generator_model.save_weights('./saved_model/generator_weights.h5')
 
     json_string = discriminator_model.to_json()
-    open('./discriminator_model.json', 'w').write(json_string)
+    open('./saved_model/discriminator_model.json', 'w').write(json_string)
     discriminator_model.save_weights('./discriminator_weights.h5')
         
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
     parser.add_argument('--datasetpath', '-d', type=str, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
-    parser.add_argument('--line_token', '-l', type=str, required=True)
-    parser.add_argument('--imgsize', default=64)
-    parser.add_argument('--epoch', default=2000)
-    parser.add_argument('--patchsize', default=32)
-    parser.add_argument('--batchsize', default=12)
+    parser.add_argument('--line_token', '-l', type=str, required=False)
+    parser.add_argument('--imgsize', '-s', default=64)
+    parser.add_argument('--epoch', '-e', default=2000)
+    parser.add_argument('--patchsize', '-p', default=32)
+    parser.add_argument('--batchsize', '-b', default=64)
 
     args = parser.parse_args()
 

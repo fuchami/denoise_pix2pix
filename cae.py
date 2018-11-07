@@ -3,6 +3,7 @@
 import numpy as np
 import argparse
 import subprocess as sp
+import os,sys
 
 import h5py
 import matplotlib.pyplot as plt
@@ -124,9 +125,12 @@ def train(args):
                         "Epoch: %s, sent a image: CAE_current_batch_validation.png !" % (e) )
 
     """ model save """
+    if not os.path.exists('./saved_model/'):
+        os.makedirs('./saved_model/')
+
     json_string = cae_model.to_json()
-    open('./cae_model.json', 'w').write(json_string)
-    cae_model.save_weights('./CAE_weights.h5')
+    open('./saved_model/cae_model.json', 'w').write(json_string)
+    cae_model.save_weights('./saved_model/CAE_weights.h5')
 
         
 def main():

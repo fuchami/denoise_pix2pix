@@ -51,7 +51,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Add Noise script')
 
-    parser.add_argument('--originpath', '-p', type=str, repuired=True)
+    parser.add_argument('--originpath', '-p', type=str, required=True)
     parser.add_argument('--save2path', '-s', type=str, required=True)
 
     args = parser.parse_args()
