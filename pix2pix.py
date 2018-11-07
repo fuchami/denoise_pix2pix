@@ -198,7 +198,7 @@ def train(args):
 
     json_string = generator_model.to_json()
     open('./saved_model/generator_model.json', 'w').write(json_string)
-    generator_model.save_weights('./saved_mddel/generator_weights.h5')
+    generator_model.save_weights('./saved_model/generator_weights.h5')
 
     json_string = discriminator_model.to_json()
     open('./saved_model/discriminator_model', 'w').write(json_string)
@@ -211,7 +211,7 @@ def main():
     parser.add_argument('--imgsize', '-s', default=64)
     parser.add_argument('--epoch', '-e', default=2000)
     parser.add_argument('--patchsize', '-p', default=32)
-    parser.add_argument('--batchsize', '-b', default=12)
+    parser.add_argument('--batchsize', '-b', default=64)
 
     args = parser.parse_args()
 
