@@ -19,16 +19,32 @@ def main(args):
 
     for i in images:
         print(i)
-        src = cv2.imread(i, 1)
+        basename = os.path.basename(i)
+        print (basename)
+
+        """ load noise images """
+        noise_src = cv2.imread(args.savepath + 'noise_train/' + basename, 1)
 
         # 反転
-        hflip_img = cv2.flip(src, 1)
+        hflip_img = cv2.flip(noise_src, 1)
         # 上下反転
-        vflip_img = cv2.flip(src, 0)
+        vflip_img = cv2.flip(noise_src, 0)
 
-        root, ext = os.path.splitext(i)
-        cv2.imwrite(root + '_hflip.png', hflip_img)
-        cv2.imwrite(root + '_vflip.png', vflip_img)
+        # save
+        cv2.imwrite(args.savepath+ 'noise_train/hflip_' + basename, hflip_img)
+        cv2.imwrite(args.savepath+ 'noise_train/vflip_' + basename, vflip_img)
+
+        """ load truth images """
+        truth_src = cv2.imread(args.savepath + 'truth_train/' + basename, 1)
+
+        # 反転
+        hflip_img = cv2.flip(noise_src, 1)
+        # 上下反転
+        vflip_img = cv2.flip(noise_src, 0)
+
+        # save
+        cv2.imwrite(args.savepath+ 'noise_train/hflip_' + basename, hflip_img)
+        cv2.imwrite(args.savepath+ 'noise_train/vflip_' + basename, vflip_img)
 
 
 if __name__ == '__main__':
