@@ -178,12 +178,10 @@ def train(args):
                 X_gen_target, X_gen = truthImage_val[idx], noiseImage_val[idx]
                 plot_generated_batch(X_gen_target, X_gen, generator_model, batch_size, "validation")
 
-
-
         print("")
         print('Epoch %s %s' % (e + 1, args.epoch))
         # 100epochごとにLINEに通知
-        if e % 100 == 0:
+        if e % 250 == 0:
             print("send image to LINE massage !")
             send_image("./images/current_batch_validation_AUG.png", args.line_token, 
                         "Epoch: %s, sent a image: current_batch_validation.png !" % (e) )
@@ -206,10 +204,10 @@ def train(args):
         
 def main():
     parser = argparse.ArgumentParser(description='Train Denoise GAN')
-    parser.add_argument('--datasetpath', '-d', type=str, default='/media/futami/HDD1/DATASET_KINGDOM/denoise/')
+    parser.add_argument('--datasetpath', '-d', type=str, default='/media/futami/HDD1/DATASET_KINGDOM/denoise_AUG/denoise/')
     parser.add_argument('--line_token', '-l', type=str, required=False)
     parser.add_argument('--imgsize', '-s', default=64)
-    parser.add_argument('--epoch', '-e', default=2000)
+    parser.add_argument('--epoch', '-e', default=3000)
     parser.add_argument('--patchsize', '-p', default=32)
     parser.add_argument('--batchsize', '-b', default=64)
 

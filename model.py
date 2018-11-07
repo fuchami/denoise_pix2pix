@@ -187,7 +187,7 @@ def CAE(img_shape, model_name='Conv_Auto_Encoder'):
 
     return model
 
-def load_generato(img_shape, disc_img_shape):
+def load_generator(img_shape, disc_img_shape):
     model = generator_unet_upsampling(img_shape, disc_img_shape)
     model.summary()
     return model
